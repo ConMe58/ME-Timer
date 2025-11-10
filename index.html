@@ -1,11 +1,10 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ME Timer</title>
 
-  <!-- System-Theme berücksichtigen -->
   <meta name="color-scheme" content="light dark" />
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#000000" />
@@ -44,7 +43,7 @@
 
     .timer {
       display: grid;
-      grid-template-columns: auto auto auto auto;
+      grid-template-columns: auto auto auto auto auto;
       gap: 14px;
       justify-content: center;
       align-items: end;
@@ -69,7 +68,8 @@
   <div class="block">
     <h2>ME seit:</h2>
     <div class="timer">
-      <div class="col"><div id="d1" class="num">0</div><div class="label">TAGEN</div></div>
+      <div class="col"><div id="y1" class="num">0</div><div class="label">JAHRE</div></div>
+      <div class="col"><div id="d1" class="num">0</div><div class="label">TAGE</div></div>
       <div class="col"><div id="h1" class="num">00</div><div class="label">STUNDEN</div></div>
       <div class="col"><div id="m1" class="num">00</div><div class="label">MINUTEN</div></div>
       <div class="col"><div id="s1" class="num">00</div><div class="label">SEKUNDEN</div></div>
@@ -79,35 +79,64 @@
   <div class="block">
     <h2>Very Severe ME seit:</h2>
     <div class="timer">
-      <div class="col"><div id="d2" class="num">0</div><div class="label">TAGEN</div></div>
+      <div class="col"><div id="y2" class="num">0</div><div class="label">JAHRE</div></div>
+      <div class="col"><div id="d2" class="num">0</div><div class="label">TAGE</div></div>
       <div class="col"><div id="h2" class="num">00</div><div class="label">STUNDEN</div></div>
       <div class="col"><div id="m2" class="num">00</div><div class="label">MINUTEN</div></div>
       <div class="col"><div id="s2" class="num">00</div><div class="label">SEKUNDEN</div></div>
     </div>
   </div>
 
+  <div class="block">
+    <h2>Bett nicht verlassen seit:</h2>
+    <div class="timer">
+      <div class="col"><div id="y3" class="num">0</div><div class="label">JAHRE</div></div>
+      <div class="col"><div id="d3" class="num">0</div><div class="label">TAGE</div></div>
+      <div class="col"><div id="h3" class="num">00</div><div class="label">STUNDEN</div></div>
+      <div class="col"><div id="m3" class="num">00</div><div class="label">MINUTEN</div></div>
+      <div class="col"><div id="s3" class="num">00</div><div class="label">SEKUNDEN</div></div>
+    </div>
+  </div>
+
   <script>
     const start1 = new Date("2022-12-10T12:00:00+01:00");
     const start2 = new Date("2023-12-23T16:30:00+01:00");
+    const start3 = new Date("2025-08-21T21:30:00+02:00");
+
     const pad = n => String(n).padStart(2, "0");
+
+    function pluralize(value, singular, plural) {
+      return value === 1 ? singular : plural;
+    }
 
     function draw(nowMs, start, id) {
       const diff = Math.floor((nowMs - start.getTime()) / 1000);
-      const days = Math.floor(diff / 86400);
+      const totalDays = Math.floor(diff / 86400);
+      const years = Math.floor(totalDays / 365);
+      const days = totalDays % 365;
       const hrs  = Math.floor((diff % 86400) / 3600);
       const mins = Math.floor((diff % 3600) / 60);
       const secs = diff % 60;
 
+      document.getElementById("y" + id).textContent = years;
       document.getElementById("d" + id).textContent = days;
       document.getElementById("h" + id).textContent = pad(hrs);
       document.getElementById("m" + id).textContent = pad(mins);
       document.getElementById("s" + id).textContent = pad(secs);
+
+      // Labels dynamisch anpassen
+      document.querySelector(`#y${id} + .label`).textContent = pluralize(years, "JAHR", "JAHRE");
+      document.querySelector(`#d${id} + .label`).textContent = pluralize(days, "TAG", "TAGE");
+      document.querySelector(`#h${id} + .label`).textContent = pluralize(hrs, "STUNDE", "STUNDEN");
+      document.querySelector(`#m${id} + .label`).textContent = pluralize(mins, "MINUTE", "MINUTEN");
+      document.querySelector(`#s${id} + .label`).textContent = pluralize(secs, "SEKUNDE", "SEKUNDEN");
     }
 
     function update() {
       const now = Date.now();
       draw(now, start1, "1");
       draw(now, start2, "2");
+      draw(now, start3, "3");
     }
 
     update();
